@@ -33,9 +33,18 @@
     <ClCompile Include="Camera.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Helicopter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+    <None Include="..\..\..\source\repos\opengl-tutorials\YoutubeOpenGL 19 - Cubemaps &amp; Skyboxes\skybox.frag">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\..\..\source\repos\opengl-tutorials\YoutubeOpenGL 19 - Cubemaps &amp; Skyboxes\skybox.vert">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Common\Mesh.h">
@@ -54,6 +63,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Camera.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="FlyingCube.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Helicopter.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

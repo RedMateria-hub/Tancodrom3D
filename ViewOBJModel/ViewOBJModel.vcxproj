@@ -151,9 +151,12 @@
     <ClCompile Include="..\Common\Shader.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="FlyingCube.cpp" />
+    <ClCompile Include="Helicopter.cpp" />
     <ClCompile Include="ViewOBJModel.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\..\..\source\repos\opengl-tutorials\YoutubeOpenGL 19 - Cubemaps &amp; Skyboxes\skybox.frag" />
+    <None Include="..\..\..\source\repos\opengl-tutorials\YoutubeOpenGL 19 - Cubemaps &amp; Skyboxes\skybox.vert" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
@@ -163,6 +166,8 @@
     <ClInclude Include="..\Common\Texture.h" />
     <ClInclude Include="..\Common\Vertex.h" />
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="FlyingCube.h" />
+    <ClInclude Include="Helicopter.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

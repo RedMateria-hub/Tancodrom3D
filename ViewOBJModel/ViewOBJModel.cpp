@@ -23,6 +23,7 @@
 #include "Shader.h"
 #include "Model.h"
 #include "FlyingCube.h"
+#include "Helicopter.h"
 
 #pragma comment (lib, "glfw3dll.lib")
 #pragma comment (lib, "glew32.lib")
@@ -92,6 +93,31 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 		pCamera->Reset(width, height);
 
 	}
+}
+
+void placeTank(Model& model, Shader& shader, glm::vec3 position) {
+	glm::mat4 tankModel = glm::scale(glm::mat4(3.0), glm::vec3(1.f));
+
+	shader.setMat4("projection", pCamera->GetProjectionMatrix());
+	shader.setMat4("view", pCamera->GetViewMatrix());
+	tankModel = glm::translate(tankModel, position);
+	shader.setMat4("model", tankModel);
+
+	model.Draw(shader);
+}
+
+void placeHelicopter(Helicopter& model, Shader& shader, glm::vec3 position) {
+	glm::mat4 helicopterModel = glm::scale(glm::mat4(1.0), glm::vec3(1.f));
+
+	shader.setMat4("projection", pCamera->GetProjectionMatrix());
+	shader.setMat4("view", pCamera->GetViewMatrix());
+	helicopterModel = glm::translate(helicopterModel, position);
+	helicopterModel = glm::rotate(helicopterModel, glm::radians(90.f), glm::vec3(-1.0f, 0.0f, 0.0f));
+	model.SetRootTransf(helicopterModel);
+
+	shader.setMat4("model", helicopterModel);
+
+	model.Draw(shader);
 }
 
 int main()
@@ -195,10 +221,9 @@ int main()
 	glEnableVertexAttribArray(0);
 
 	// Create camera
-	pCamera = new Camera(SCR_WIDTH, SCR_HEIGHT, glm::vec3(-12.0, 23.0, -41.0));
+	pCamera = new Camera(SCR_WIDTH, SCR_HEIGHT, glm::vec3(-130.0, 32.0, -61.0));
 
 	glm::vec3 lightPos(0.0f, 2.0f, 1.0f);
-	glm::vec3 cubePos(0.0f, 5.0f, 1.0f);
 
 	wchar_t buffer[MAX_PATH];
 	GetCurrentDirectoryW(MAX_PATH, buffer);
@@ -208,24 +233,26 @@ int main()
 
 	std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
 	std::string currentPath = converter.to_bytes(wscurrentPath);
-
-	Shader lightingShader((currentPath + "\\Shaders\\PhongLight.vs").c_str(), (currentPath + "\\Shaders\\PhongLight.fs").c_str());
 	Shader lightingWithTextureShader((currentPath + "\\Shaders\\PhongLightWithTexture.vs").c_str(), (currentPath + "\\Shaders\\PhongLightWithTexture.fs").c_str());
-	Shader lampShader((currentPath + "\\Shaders\\Lamp.vs").c_str(), (currentPath + "\\Shaders\\Lamp.fs").c_str());
-
-	//std::string objFileName = (currentPath + "\\Models\\FlyingCube.obj");
-	//FlyingCube flyingCubeModel(objFileName, false);
+	
 
 	std::string helicopterObjFileName = (currentPath + "\\Models\\Helicopter\\uh60.dae");
-	Model helicopterObjModel(helicopterObjFileName, false);
+	Helicopter helicopterObjModel1(helicopterObjFileName, false);
+	Helicopter helicopterObjModel2(helicopterObjFileName, false);
+	Helicopter helicopterObjModel3(helicopterObjFileName, false);
+	Helicopter helicopterObjModel4(helicopterObjFileName, false);
+	Helicopter helicopterObjModel5(helicopterObjFileName, false);
+
+	std::string tankObjFileName = (currentPath + "\\Models\\Tank\\IS.obj");
+	Model tankObjModel1(tankObjFileName, false);
+	Model tankObjModel2(tankObjFileName, false);
+	Model tankObjModel3(tankObjFileName, false);
+	Model tankObjModel4(tankObjFileName, false);
+	Model tankObjModel5(tankObjFileName, false);
+	
 
 	std::string grassObjFileName = (currentPath + "\\Models\\Grass\\10450_Rectangular_Grass_Patch_v1_iterations-2.obj");
 	Model grassObjModel(grassObjFileName, false);
-
-	glm::mat4 mainRotorTransform = glm::mat4(1.0f); // Identity matrix
-	glm::mat4 rearRotorTransform = glm::mat4(1.0f); // Identity matrix
-	float angle = 0.0f; // Initial rotation angle
-	float rearAngle = 0.0f; // Initial rotation angle
 
 	// render loop
 	while (!glfwWindowShouldClose(window)) {
@@ -239,28 +266,6 @@ int main()
 
 		float intensity = 1.0f;
 
-		lightPos.x = 2.5 * cos(glfwGetTime());
-		lightPos.z = 2.5 * sin(glfwGetTime());
-
-		cubePos.x = 10 * sin(glfwGetTime());
-		cubePos.z = 10 * cos(glfwGetTime());
-
-		lightingShader.use();
-		lightingShader.SetVec3("objectColor", 0.5f, 1.0f, 0.31f);
-		lightingShader.SetVec3("lightColor", 5.0f * intensity, 5.0f * intensity, 5.0f * intensity);
-		lightingShader.SetVec3("lightPos", lightPos);
-		lightingShader.SetVec3("viewPos", pCamera->GetPosition());
-
-		lightingShader.setMat4("projection", pCamera->GetProjectionMatrix());
-		lightingShader.setMat4("view", pCamera->GetViewMatrix());
-
-		// render the model
-		glm::mat4 model = glm::scale(glm::mat4(1.0), glm::vec3(0.1f));
-		model = glm::translate(model, cubePos);
-		//flyingCubeModel.SetRootTransf(model);
-		//lightingShader.setMat4("model", model);
-		//flyingCubeModel.Draw(lightingShader);
-
 		lightingWithTextureShader.use();
 		lightingWithTextureShader.SetVec3("objectColor", 0.5f, 1.0f, 0.31f);
 		lightingWithTextureShader.SetVec3("lightColor", 1.0f * intensity, 1.0f * intensity, 1.0f * intensity);
@@ -268,36 +273,23 @@ int main()
 		lightingWithTextureShader.SetVec3("viewPos", pCamera->GetPosition());
 		lightingWithTextureShader.setInt("texture_diffuse1", 0);
 
+		//---------------------------------------------------------------------------------------------
 
-		lightingWithTextureShader.setMat4("projection", pCamera->GetProjectionMatrix());
-		lightingWithTextureShader.setMat4("view", pCamera->GetViewMatrix());
-		glm::mat4 helicopterModel = glm::scale(glm::mat4(1.0), glm::vec3(1.f));
-		helicopterModel = glm::translate(helicopterModel, glm::vec3(-5.0f, 15.0f, 0.0f));;
-		helicopterModel = glm::rotate(helicopterModel, glm::radians(90.f), glm::vec3(-1.0f, 0.0f, 0.0f));;
-		lightingWithTextureShader.setMat4("model", helicopterModel);
-		// Set the transformation for the model
-		//helicopterObjModel.SetRootTransf(helicopterModel);
-		// Update rotor angle
-		angle += glm::radians(90.0f) * deltaTime * 10; // Rotate 90 degrees 10 times per second
-		rearAngle += glm::radians(90.0f) * deltaTime /** 10*/; // Rotate 90 degrees 10 times per second
-		mainRotorTransform = glm::translate(glm::mat4(1.f), glm::vec3(-5.0f, 15.0f, 0.0f));
-		mainRotorTransform = glm::rotate(mainRotorTransform, angle, glm::vec3(0.0f, 1.0f, 0.0f));
-		mainRotorTransform = glm::rotate(mainRotorTransform, glm::radians(90.0f), glm::vec3(-1.0f, 0.0f, 0.0f));
+		placeHelicopter(helicopterObjModel1, lightingWithTextureShader, glm::vec3(-5.0f, 10.0f, 0.0f));
+		placeHelicopter(helicopterObjModel2, lightingWithTextureShader, glm::vec3(-25.0f, 10.0f, 0.0f));
+		placeHelicopter(helicopterObjModel3, lightingWithTextureShader, glm::vec3(15.0f, 10.0f, 0.0f));
+		placeHelicopter(helicopterObjModel4, lightingWithTextureShader, glm::vec3(5.0f, 20.0f, 10.0f));
+		placeHelicopter(helicopterObjModel5, lightingWithTextureShader, glm::vec3(-15.0f, 20.0f, 10.0f));
 
-		
-		//rearRotorTransform = glm::translate(glm::mat4(1.f), glm::vec3(-5.0f, 15.0f, 0.0f));
-		//rearRotorTransform = glm::rotate(rearRotorTransform, rearAngle, glm::vec3(0.0f,  5.0f, 0.0f));
-		//rearRotorTransform = glm::rotate(rearRotorTransform, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+		//---------------------------------------------------------------------------------------------
 
+		placeTank(tankObjModel1, lightingWithTextureShader, glm::vec3(8.0f, -2.5f, -20.0f));
+		placeTank(tankObjModel2, lightingWithTextureShader, glm::vec3(-2.0f, -2.5f, -20.0f));
+		placeTank(tankObjModel3, lightingWithTextureShader, glm::vec3(-12.0f, -2.5f, -20.0f));
+		placeTank(tankObjModel4, lightingWithTextureShader, glm::vec3(3.0f, -2.5f, -30.0f));
+		placeTank(tankObjModel5, lightingWithTextureShader, glm::vec3(-8.0f, -2.5f, -30.0f));
 
-		
-		helicopterObjModel.setIsAnimated(true);
-		helicopterObjModel.moveModel(helicopterModel);
-		helicopterObjModel.setNodeTransforms("main_rotor", mainRotorTransform);
-		//helicopterObjModel.setNodeTransforms("rear_rotor", rearRotorTransform);
-
-		helicopterObjModel.Draw(lightingWithTextureShader);
-		helicopterObjModel.printNodeNames();
+		//---------------------------------------------------------------------------------------------
 
 		lightingWithTextureShader.setMat4("projection", pCamera->GetProjectionMatrix());
 		lightingWithTextureShader.setMat4("view", pCamera->GetViewMatrix());
@@ -307,13 +299,6 @@ int main()
 		lightingWithTextureShader.setMat4("model", grassModel);
 		grassObjModel.Draw(lightingWithTextureShader);
 
-		// also draw the lamp object
-		lampShader.use();
-		lampShader.setMat4("projection", pCamera->GetProjectionMatrix());
-		lampShader.setMat4("view", pCamera->GetViewMatrix());
-		glm::mat4 lightModel = glm::translate(glm::mat4(1.0), lightPos);
-		lightModel = glm::scale(lightModel, glm::vec3(0.05f)); // a smaller cube
-		lampShader.setMat4("model", lightModel);
 
 		glBindVertexArray(lightVAO);
 		glDrawArrays(GL_TRIANGLES, 0, 36);
