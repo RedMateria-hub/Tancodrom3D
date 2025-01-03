@@ -20,8 +20,8 @@ private:
 	// Default camera values
 	const float zNEAR = 0.1f;
 	const float zFAR = 500.f;
-	const float YAW = -289.801;
-	const float PITCH = -24.9f;
+	const float YAW = -350.f;
+	const float PITCH = -20.f;
 	const float FOV = 45.0f;
 	glm::vec3 startPosition;
 
