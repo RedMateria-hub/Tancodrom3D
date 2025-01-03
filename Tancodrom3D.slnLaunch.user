@@ -1,0 +1,11 @@
+[
+  {
+    "Name": "New Profile",
+    "Projects": [
+      {
+        "Path": "Tancodrom3D\\Tancodrom3D.vcxproj",
+        "Action": "Start"
+      }
+    ]
+  }
+]
