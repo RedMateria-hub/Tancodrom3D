@@ -22,7 +22,6 @@
 #include "Camera.h"
 #include "Shader.h"
 #include "Model.h"
-#include "FlyingCube.h"
 #include "Helicopter.h"
 
 #pragma comment (lib, "glfw3dll.lib")
