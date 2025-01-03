@@ -98,6 +98,26 @@ void Mesh::Draw(Shader& shader)
    //std::cout << "end drawing " << std::endl;
 }
 
+glm::vec3 Mesh::CalculatePivot()
+{
+    glm::vec3 center(0.0f);
+
+    // Ensure the vertices pointer is valid and numVertices > 0
+    if (!vertices || numVertices == 0) {
+        return center; // Return origin if data is invalid
+    }
+
+    // Sum all vertex positions
+    for (unsigned int i = 0; i < numVertices; ++i) {
+        center += vertices.get()[i].Position;
+    }
+
+    // Compute the average position
+    center /= static_cast<float>(numVertices);
+
+    return center;
+}
+
 // initializes all the buffer objects/arrays
 void Mesh::setupMesh()
 {

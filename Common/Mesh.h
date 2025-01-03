@@ -27,6 +27,8 @@ public:
     Mesh(std::string name, const vector<Vertex>& vertices, const vector<unsigned int>& indices, const vector<Texture>& textures);
     Mesh(std::string name, unsigned int numVertices, std::shared_ptr <Vertex> vertices, unsigned int numIndexes, std::shared_ptr <unsigned int> indices, const vector<Texture>& textures);
     void Draw(Shader& shader);
+
+    glm::vec3 CalculatePivot();
 private:
     // render data 
     unsigned int VBO, EBO;
