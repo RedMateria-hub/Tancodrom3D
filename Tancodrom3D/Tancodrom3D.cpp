@@ -148,66 +148,10 @@ int main()
 
 	glEnable(GL_DEPTH_TEST);
 
-	// set up vertex data (and buffer(s)) and configure vertex attributes
-	float vertices[] = {
-		-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-		0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-		0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-		0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-		-0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-		-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-
-		-0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
-		0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
-		0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
-		0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
-		-0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
-		-0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
-
-		-0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
-		-0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
-		-0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
-		-0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
-		-0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
-		-0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
-
-		0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
-		0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
-		0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
-		0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
-		0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
-		0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
-
-		-0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
-		0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
-		0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
-		0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
-		-0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
-		-0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
-
-		-0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
-		0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
-		0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
-		0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
-		-0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
-		-0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f
-	};
-	// first, configure the cube's VAO (and VBO)
-	unsigned int VBO, cubeVAO;
-	glGenVertexArrays(1, &cubeVAO);
+	
+	unsigned int VBO;
 	glGenBuffers(1, &VBO);
-
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-	glBindVertexArray(cubeVAO);
-
-	// position attribute
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
-	glEnableVertexAttribArray(0);
-	// normal attribute
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
-	glEnableVertexAttribArray(1);
 
 	// second, configure the light's VAO (VBO stays the same; the vertices are the same for the light object which is also a 3D cube)
 	unsigned int lightVAO;
@@ -282,17 +226,17 @@ int main()
 
 		//---------------------------------------------------------------------------------------------
 
-		placeTank(tankObjModel1, lightingWithTextureShader, glm::vec3(8.0f, -2.5f, -20.0f));
-		placeTank(tankObjModel2, lightingWithTextureShader, glm::vec3(-2.0f, -2.5f, -20.0f));
+		placeTank(tankObjModel1, lightingWithTextureShader, glm::vec3(8.0f, -2.3f, -20.0f));
+		placeTank(tankObjModel2, lightingWithTextureShader, glm::vec3(-2.0f, -2.3f, -20.0f));
 		placeTank(tankObjModel3, lightingWithTextureShader, glm::vec3(-12.0f, -2.5f, -20.0f));
-		placeTank(tankObjModel4, lightingWithTextureShader, glm::vec3(3.0f, -2.5f, -30.0f));
+		placeTank(tankObjModel4, lightingWithTextureShader, glm::vec3(3.0f, -2.3f, -30.0f));
 		placeTank(tankObjModel5, lightingWithTextureShader, glm::vec3(-8.0f, -2.5f, -30.0f));
 
 		//---------------------------------------------------------------------------------------------
 
 		lightingWithTextureShader.setMat4("projection", pCamera->GetProjectionMatrix());
 		lightingWithTextureShader.setMat4("view", pCamera->GetViewMatrix());
-		glm::mat4 grassModel = glm::scale(glm::mat4(1.0), glm::vec3(1.f));
+		glm::mat4 grassModel = glm::scale(glm::mat4(1.0), glm::vec3(8.0f,1.f, 8.f));
 		grassModel = glm::rotate(grassModel, glm::radians(90.f), glm::vec3(-1.0f, 0.0f, 0.0f));;
 		grassModel = glm::translate(grassModel, glm::vec3(0.0f, 0.0f, -15.0f));
 		lightingWithTextureShader.setMat4("model", grassModel);
@@ -309,7 +253,6 @@ int main()
 
 	Cleanup();
 
-	glDeleteVertexArrays(1, &cubeVAO);
 	glDeleteVertexArrays(1, &lightVAO);
 	glDeleteBuffers(1, &VBO);
 
