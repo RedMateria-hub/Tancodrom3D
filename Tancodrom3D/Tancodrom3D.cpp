@@ -1,4 +1,4 @@
-#include <Windows.h>
+﻿#include <Windows.h>
 #include <locale>
 #include <codecvt>
 
@@ -14,8 +14,6 @@
 
 #include <glfw3.h>
 
-
-
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -23,6 +21,8 @@
 #include "Shader.h"
 #include "Model.h"
 #include "Helicopter.h"
+
+#include "stb_image.h"
 
 #pragma comment (lib, "glfw3dll.lib")
 #pragma comment (lib, "glew32.lib")
@@ -34,6 +34,9 @@ const unsigned int SCR_HEIGHT = 600;
 
 GLuint ProjMatrixLocation, ViewMatrixLocation, WorldMatrixLocation;
 Camera* pCamera = nullptr;
+
+bool isNight = false;
+bool nKeyPressed = false;
 
 void Cleanup()
 {
@@ -55,25 +58,34 @@ void PrintCameraPosition() {
 
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
-	if (key == GLFW_KEY_A && action == GLFW_PRESS) {
-
+	if (key == GLFW_KEY_N) {
+		if (action == GLFW_PRESS && !nKeyPressed) {
+			isNight = !isNight;
+			nKeyPressed = true;
+		}
+		else if (action == GLFW_RELEASE) {
+			nKeyPressed = false;
+		}
 	}
+
 
 	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
 		glfwSetWindowShouldClose(window, true);
 
+	bool cameraMoved = false;
+
 	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-		pCamera->ProcessKeyboard(FORWARD, (float)deltaTime);
+		cameraMoved = pCamera->ProcessKeyboard(FORWARD, (float)deltaTime);
 	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-		pCamera->ProcessKeyboard(BACKWARD, (float)deltaTime);
+		cameraMoved = pCamera->ProcessKeyboard(BACKWARD, (float)deltaTime);
 	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-		pCamera->ProcessKeyboard(LEFT, (float)deltaTime);
+		cameraMoved = pCamera->ProcessKeyboard(LEFT, (float)deltaTime);
 	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-		pCamera->ProcessKeyboard(RIGHT, (float)deltaTime);
+		cameraMoved = pCamera->ProcessKeyboard(RIGHT, (float)deltaTime);
 	if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
-		pCamera->ProcessKeyboard(UP, (float)deltaTime);
+		cameraMoved = pCamera->ProcessKeyboard(UP, (float)deltaTime);
 	if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
-		pCamera->ProcessKeyboard(DOWN, (float)deltaTime);
+		cameraMoved = pCamera->ProcessKeyboard(DOWN, (float)deltaTime);
 	if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
 		pCamera->RotateHorizontally(-1.f);
 	if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
@@ -83,7 +95,7 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 	if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
 		pCamera->RotateVertically(1.f);
 
-	if (action == GLFW_PRESS || action == GLFW_REPEAT)
+	if (cameraMoved && action == GLFW_PRESS || action == GLFW_REPEAT)
 		PrintCameraPosition();
 
 	if (glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS) {
@@ -93,6 +105,68 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 
 	}
 }
+
+unsigned int backgroundVAO, backgroundVBO, backgroundTexture;
+
+void loadBackgroundTexture(const char* filePath) {
+	glGenTextures(1, &backgroundTexture);
+	glBindTexture(GL_TEXTURE_2D, backgroundTexture);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	int width, height, nrChannels;
+	unsigned char* data = stbi_load(filePath, &width, &height, &nrChannels, 0);
+	if (data) {
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+		glGenerateMipmap(GL_TEXTURE_2D);
+	}
+	else {
+		std::cout << "Failed to load background texture" << std::endl;
+	}
+	stbi_image_free(data);
+}
+
+void setupBackgroundQuad() {
+	float vertices[] = {
+		// poziții       // coordonate textură
+		-1.0f,  1.0f, 0.0f, 0.0f, 1.0f,
+		-1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
+		 1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
+		 1.0f,  1.0f, 0.0f, 1.0f, 1.0f
+	};
+	unsigned int indices[] = { 0, 1, 2, 2, 3, 0 };
+
+	glGenVertexArrays(1, &backgroundVAO);
+	glGenBuffers(1, &backgroundVBO);
+	unsigned int EBO;
+	glGenBuffers(1, &EBO);
+
+	glBindVertexArray(backgroundVAO);
+
+	glBindBuffer(GL_ARRAY_BUFFER, backgroundVBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+	glEnableVertexAttribArray(1);
+}
+
+void drawBackground(Shader& backgroundShader) {
+	glDisable(GL_DEPTH_TEST); // Dezactivează testul de profunzime pentru fundal
+	backgroundShader.use();
+	glBindVertexArray(backgroundVAO);
+	glBindTexture(GL_TEXTURE_2D, backgroundTexture);
+	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+	glEnable(GL_DEPTH_TEST); // Reactivare test de profunzime
+}
+
 
 void placeTank(Model& model, Shader& shader, glm::vec3 position) {
 	glm::mat4 tankModel = glm::scale(glm::mat4(3.0), glm::vec3(1.f));
@@ -117,6 +191,43 @@ void placeHelicopter(Helicopter& model, Shader& shader, glm::vec3 position) {
 	shader.setMat4("model", helicopterModel);
 
 	model.Draw(shader);
+}
+
+unsigned int CreateTexture(const std::string& strTexturePath)
+{
+	unsigned int textureId = -1;
+
+	// load image, create texture and generate mipmaps
+	int width, height, nrChannels;
+	stbi_set_flip_vertically_on_load(true); // tell stb_image.h to flip loaded texture's on the y-axis.
+	unsigned char* data = stbi_load(strTexturePath.c_str(), &width, &height, &nrChannels, 0);
+	if (data) {
+		GLenum format;
+		if (nrChannels == 1)
+			format = GL_RED;
+		else if (nrChannels == 3)
+			format = GL_RGB;
+		else if (nrChannels == 4)
+			format = GL_RGBA;
+
+		glGenTextures(1, &textureId);
+		glBindTexture(GL_TEXTURE_2D, textureId);
+		glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+		glGenerateMipmap(GL_TEXTURE_2D);
+
+		// set the texture wrapping parameters
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+		// set texture filtering parameters
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	}
+	else {
+		std::cout << "Failed to load texture: " << strTexturePath << std::endl;
+	}
+	stbi_image_free(data);
+
+	return textureId;
 }
 
 int main()
@@ -148,25 +259,8 @@ int main()
 
 	glEnable(GL_DEPTH_TEST);
 
-	
-	unsigned int VBO;
-	glGenBuffers(1, &VBO);
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-
-	// second, configure the light's VAO (VBO stays the same; the vertices are the same for the light object which is also a 3D cube)
-	unsigned int lightVAO;
-	glGenVertexArrays(1, &lightVAO);
-	glBindVertexArray(lightVAO);
-
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	// note that we update the lamp's position attribute's stride to reflect the updated buffer data
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
-	glEnableVertexAttribArray(0);
-
 	// Create camera
-	pCamera = new Camera(SCR_WIDTH, SCR_HEIGHT, glm::vec3(-130.0, 32.0, -61.0));
-
-	glm::vec3 lightPos(0.0f, 2.0f, 1.0f);
+	pCamera = new Camera(SCR_WIDTH, SCR_HEIGHT, glm::vec3(-70.1505, 24.0382, -134.207));
 
 	wchar_t buffer[MAX_PATH];
 	GetCurrentDirectoryW(MAX_PATH, buffer);
@@ -177,7 +271,6 @@ int main()
 	std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
 	std::string currentPath = converter.to_bytes(wscurrentPath);
 	Shader lightingWithTextureShader((currentPath + "\\Shaders\\PhongLightWithTexture.vs").c_str(), (currentPath + "\\Shaders\\PhongLightWithTexture.fs").c_str());
-	
 
 	std::string helicopterObjFileName = (currentPath + "\\Models\\Helicopter\\uh60.dae");
 	Helicopter helicopterObjModel1(helicopterObjFileName, false);
@@ -192,26 +285,49 @@ int main()
 	Model tankObjModel3(tankObjFileName, false);
 	Model tankObjModel4(tankObjFileName, false);
 	Model tankObjModel5(tankObjFileName, false);
-	
 
 	std::string grassObjFileName = (currentPath + "\\Models\\Grass\\10450_Rectangular_Grass_Patch_v1_iterations-2.obj");
 	Model grassObjModel(grassObjFileName, false);
+
+	Shader backgroundShader((currentPath + "\\Shaders\\Background.vs").c_str(), (currentPath + "\\Shaders\\Background.fs").c_str());
+	setupBackgroundQuad();
+
+	glm::vec3 lightPos(8.0f, -2.3f, -20.0f);
 
 	// render loop
 	while (!glfwWindowShouldClose(window)) {
 		// per-frame time logic
 		double currentFrame = glfwGetTime();
+
+		if (!isNight)
+			loadBackgroundTexture((currentPath + "\\Textures\\CloudsDay.png").c_str());
+		else
+			loadBackgroundTexture((currentPath + "\\Textures\\StarsNight.png").c_str());
+
 		deltaTime = currentFrame - lastFrame;
 		lastFrame = currentFrame;
 
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-		float intensity = 1.0f;
+		drawBackground(backgroundShader);
 
 		lightingWithTextureShader.use();
+		if (!isNight)
+		{
+			lightingWithTextureShader.SetVec3("lightColor", 1.1f, 1.1f, 1.0f);
+			lightingWithTextureShader.setFloat("ambientStrength", 0.6f);
+			lightingWithTextureShader.setFloat("diffuseStrength", 0.3f);
+			lightingWithTextureShader.setFloat("specularStrength", 1.f);
+		}
+		else
+		{
+
+			lightingWithTextureShader.SetVec3("lightColor", 1.0f, 1.0f, 1.3f);
+			lightingWithTextureShader.setFloat("ambientStrength", 0.4f);
+			lightingWithTextureShader.setFloat("diffuseStrength", 0.1f);
+			lightingWithTextureShader.setFloat("specularStrength", 0.3f);
+		}
 		lightingWithTextureShader.SetVec3("objectColor", 0.5f, 1.0f, 0.31f);
-		lightingWithTextureShader.SetVec3("lightColor", 1.0f * intensity, 1.0f * intensity, 1.0f * intensity);
 		lightingWithTextureShader.SetVec3("lightPos", lightPos);
 		lightingWithTextureShader.SetVec3("viewPos", pCamera->GetPosition());
 		lightingWithTextureShader.setInt("texture_diffuse1", 0);
@@ -242,9 +358,8 @@ int main()
 		lightingWithTextureShader.setMat4("model", grassModel);
 		grassObjModel.Draw(lightingWithTextureShader);
 
+		//---------------------------------------------------------------------------------------------
 
-		glBindVertexArray(lightVAO);
-		glDrawArrays(GL_TRIANGLES, 0, 36);
 
 		// glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
 		glfwSwapBuffers(window);
@@ -253,8 +368,6 @@ int main()
 
 	Cleanup();
 
-	glDeleteVertexArrays(1, &lightVAO);
-	glDeleteBuffers(1, &VBO);
 
 	// glfw: terminate, clearing all previously allocated GLFW resources
 	glfwTerminate();

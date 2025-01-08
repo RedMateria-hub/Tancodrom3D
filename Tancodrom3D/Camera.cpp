@@ -116,12 +116,11 @@ bool Camera::ProcessKeyboard(ECameraMovementType direction, float deltaTime)
 		break;
 	}
 
-	/*
 	if (auxPosition.x < minBounds.x || auxPosition.x > maxBounds.x ||
         auxPosition.y < minBounds.y || auxPosition.y > maxBounds.y ||
         auxPosition.z < minBounds.z || auxPosition.z > maxBounds.z) {
         return false;
-    }*/
+    }
 
 	if (auxPosition.x == position.x && auxPosition.y == position.y && auxPosition.z == position.z)
 		return false;
