@@ -20,8 +20,8 @@ private:
 	// Default camera values
 	const float zNEAR = 0.1f;
 	const float zFAR = 500.f;
-	const float YAW = -350.f;
-	const float PITCH = -20.f;
+	const float YAW = -310.2f;
+	const float PITCH = -14.f;
 	const float FOV = 45.0f;
 	glm::vec3 startPosition;
 
@@ -43,7 +43,7 @@ public:
 	void RotateHorizontally(float angleDelta);
 	void RotateVertically(float angleDelta);
 
-	void ProcessKeyboard(ECameraMovementType direction, float deltaTime);
+	bool ProcessKeyboard(ECameraMovementType direction, float deltaTime);
 
 	void MouseControl(float xPos, float yPos);
 
@@ -59,7 +59,7 @@ private:
 	void UpdateCameraVectors();
 
 protected:
-	const float cameraSpeedFactor = 1500.0f;
+	const float cameraSpeedFactor = 150.0f;
 	const float mouseSensitivity = 0.1f;
 
 	// Perspective properties

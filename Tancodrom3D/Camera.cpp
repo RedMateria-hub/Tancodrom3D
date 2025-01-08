@@ -85,29 +85,50 @@ void Camera::RotateVertically(float angleDelta)
 	UpdateCameraVectors(); // Recalculate forward, right, and up vectors
 }
 
-void Camera::ProcessKeyboard(ECameraMovementType direction, float deltaTime)
+bool Camera::ProcessKeyboard(ECameraMovementType direction, float deltaTime)
 {
-	float velocity = (float)(cameraSpeedFactor * deltaTime);
+	//x=-127.839, y=-5.2071, z=-155.855,
+	//
+
+	float velocity = static_cast<float>(cameraSpeedFactor * deltaTime);
+	glm::vec3 auxPosition = position;
+	glm::vec3 minBounds(-200.0f, -5.2f, -200.0f); 
+	glm::vec3 maxBounds(200.0f, 40.0f, 200.0f);
+
 	switch (direction) {
 	case ECameraMovementType::FORWARD:
-		position += forward * velocity;
+		auxPosition += forward * velocity;
 		break;
 	case ECameraMovementType::BACKWARD:
-		position -= forward * velocity;
+		auxPosition -= forward * velocity;
 		break;
 	case ECameraMovementType::LEFT:
-		position -= right * velocity;
+		auxPosition -= right * velocity;
 		break;
 	case ECameraMovementType::RIGHT:
-		position += right * velocity;
+		auxPosition += right * velocity;
 		break;
 	case ECameraMovementType::UP:
-		position += up * velocity;
+		auxPosition += up * velocity;
 		break;
 	case ECameraMovementType::DOWN:
-		position -= up * velocity;
+		auxPosition -= up * velocity;
 		break;
 	}
+
+	/*
+	if (auxPosition.x < minBounds.x || auxPosition.x > maxBounds.x ||
+        auxPosition.y < minBounds.y || auxPosition.y > maxBounds.y ||
+        auxPosition.z < minBounds.z || auxPosition.z > maxBounds.z) {
+        return false;
+    }*/
+
+	if (auxPosition.x == position.x && auxPosition.y == position.y && auxPosition.z == position.z)
+		return false;
+
+	position = auxPosition;
+
+	return true;
 }
 
 void Camera::MouseControl(float xPos, float yPos)
